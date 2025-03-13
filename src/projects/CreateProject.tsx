@@ -1,5 +1,6 @@
 import { Link,useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import {useMutation}from '@tanstack/react-query'
 import ProjectForm from "./ProjectForm";
 import{DraftProject} from '../Types/uptaskTypes'
 import { createProject } from "../routers/createProject";
@@ -16,15 +17,38 @@ export const CreateProject = () => {
     handleSubmit,
     formState: { errors },
   } = useForm({ defaultValues: initialValues });
-  const handleData = async (data:DraftProject) => {
-    const response = await createProject(data);
-    if(response){
-      toast.success(`${response.message}`,{
+
+  //Utilizando uaseMutation
+  // const mutation = useMutation({
+  //   mutationFn:createProject,
+  //   onError:()=>{
+      
+  //   },
+  //   onSuccess:(response)=>{
+  //     toast.success(`${response.message}`,{
+  //       theme:'dark'
+  //     })
+  //      navegate('/')
+  //   }
+  // })
+  const {mutate}= useMutation({
+    mutationFn:createProject,
+    onError:(error)=>{
+      //Que hacer si existen errores
+      toast.error(error.message,{
         theme:'dark'
-      })
+      }) 
+    },
+    onSuccess:(response)=>{
+     //Que hacer si todo salie bien
+     toast.success(`${response.message}`,{
+            theme:'dark'
+          })
+           navegate('/')
     }
-   return navegate('/')
-  };
+  })
+  //Llamado de la funcion mutate
+  const handleData = (data:DraftProject) =>( mutate(data))
   return (
     <>
     <div className=" max-w-3xl mx-auto">

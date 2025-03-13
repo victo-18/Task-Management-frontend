@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { z, ZodSchema } from "zod";
 import { DraftProject } from "../Types/uptaskTypes";
 export async function createProject(project: DraftProject) {
@@ -14,11 +14,15 @@ export async function createProject(project: DraftProject) {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_URL_BACKEND}/api/project`,
-         project 
+        project
       );
       return response.data;
     } catch (error) {
-      console.error(error);
+      if (isAxiosError(error) && error.response) {
+        throw new Error(
+          "Something was going wrong, the project couldn't be created"
+        );
+      }
     }
   }
 }
