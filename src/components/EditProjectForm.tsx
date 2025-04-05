@@ -1,51 +1,58 @@
 import { Link, useNavigate } from "react-router-dom";
 import { DraftProject } from "../Types/uptaskTypes";
-import { Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import ProjectForm from "../projects/ProjectForm";
-import { useMutation,useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProject } from "../routers/project";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 type ProjectProps = {
   data: DraftProject;
   projectId: string;
 };
 export const EditProjectForm = ({ data, projectId }: ProjectProps) => {
-    const navegate = useNavigate()
+  const navegate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     defaultValues: {
-      projectName: data.clientName,
+      projectName: data.projectName,
       clientName: data.clientName,
       description: data.description,
     },
   });
-  const queryClient = useQueryClient()
-const { mutate } = useMutation({
+  //establece los valores por default
+  useEffect(() => {
+    reset({
+      projectName: data.projectName,
+      clientName: data.clientName,
+      description: data.description,
+    });
+  }, [data, reset]);
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
     mutationFn: updateProject,
     onError: () => {
-        return <Navigate to={"/404"} />;
+      return navegate("/404");
     },
-  
+
     onSuccess: (data) => {
       //Eliminando los datos cacheados con query
-      queryClient.invalidateQueries({queryKey:['projects']})
-      queryClient.invalidateQueries({queryKey:['editProjects', projectId]})
-        toast.success(data.message,{
-            theme:"dark"
-        });
-        console.log(data)
-      
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["editProjects", projectId] });
+      toast.success(data.message, {
+        theme: "dark",
+      });
     },
-});
+  });
 
   const handleData = (formData: DraftProject) => {
     const data = { formData, projectId };
     mutate(data);
-    navegate('/')
+    navegate("/");
   };
   return (
     <>
