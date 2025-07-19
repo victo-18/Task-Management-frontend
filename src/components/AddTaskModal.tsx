@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import FormTask from "../components/FormTask";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation ,useQueryClient} from "@tanstack/react-query";
 import { createTask } from "../routers/taskRouterAPI";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
@@ -19,19 +19,29 @@ export default function AddTaskModal() {
     name: string;
     description: string;
   };
-
+  //Definiendo las variables iniciales para el formulario
   const initialValues: TaskForm = {
     name: "",
     description: "",
   };
+  //Utilizando react hook form para el manejo del formulario
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },reset
+  } = useForm({ defaultValues: initialValues });
+//Invalidando query para que se actualice la lista de tareas
+const queryClient= useQueryClient()
   //Utilizando mutaciones para el llamado a la
   const { mutate } = useMutation({
     mutationFn: createTask,
     onSuccess: (data) => {
+      const projectId = params.projectId; // Extract projectId from params
+      queryClient.invalidateQueries({queryKey:["editProjects", projectId]})
       toast.success(data.message, {
         theme: "dark",
       });
-
+       reset();
       navegate(location.pathname, { replace: true });
     },
     onError: (error) => {
@@ -40,11 +50,7 @@ export default function AddTaskModal() {
       });
     },
   });
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ defaultValues: initialValues });
+  
   const handleData = (formData: TaskForm) => {
     if (!params.projectId) {
       toast.error("Project ID is missing", { theme: "dark" });

@@ -4,6 +4,8 @@ import { Navigate } from "react-router-dom";
 import { getProjectById } from "../routers/project";
 import { Loader } from "../components/Loader";
 import AddTaskModal from "../components/AddTaskModal";
+import { TaskDetail } from "../components/TaskDetail";
+import { EditData } from "../components/EditData";
 
 export const ProjectDetailVews = () => {
     const navegate = useNavigate()
@@ -16,6 +18,7 @@ export const ProjectDetailVews = () => {
   });
   if (isLoading) return <Loader />;
   if (isError) return <Navigate to={"/404"} />;
+
   if (data)
     return (
       <>
@@ -32,7 +35,9 @@ export const ProjectDetailVews = () => {
             Add Task
           </button>
         </nav>
+        <TaskDetail tasks={data.tasks}/>
         <AddTaskModal/>
+        <EditData/>
       </>
     );
 };
